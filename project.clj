@@ -1,8 +1,8 @@
 (defproject puzzle "0.1.0-SNAPSHOT"
   :plugins [[lein-cljsbuild "LATEST"]]
-  :dependencies [[org.clojure/clojure "LATEST"]
-                 [org.clojure/clojurescript "LATEST"]
-                 [reagent "LATEST"]]
+  :dependencies [[org.clojure/clojure "1.9.0"]
+                 [org.clojure/clojurescript "1.10.339"]
+                 [reagent "0.8.1"]]
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["cljs-src"]

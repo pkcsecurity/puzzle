@@ -11,3 +11,4 @@ pom.xml.asc
 .hg/
 /static/development
 /static/release
+*.iml

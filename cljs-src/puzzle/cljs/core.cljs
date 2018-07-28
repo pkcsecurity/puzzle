@@ -29,8 +29,9 @@
 
 (defn on-drag-start-fn [id angle valid-offset? z-index offset-x offset-y]
   (fn [e]
+    (println "yo2")
     (remove-drag-shadow e)
-    (reset! z-index 1)
+    (reset! z-index 110)
     (let [{:keys [x y]} (id->coords id e)]
       (reset! offset-x x) 
       (reset! offset-y y)
@@ -40,6 +41,7 @@
 
 (defn on-drag-fn [id x y offset-x offset-y]
   (fn [e]
+    (println "yo3")
     (let [x1 (.-clientX e)
           y1 (.-clientY e)]
       (when-not (and (zero? x1) (zero? y1))
@@ -51,16 +53,17 @@
         y (r/atom (clamped-rand-int 0 (- (.-innerHeight js/window) height)))
         offset-x (r/atom 0)
         offset-y  (r/atom 0)
-        z-index (r/atom 0)
+        z-index (r/atom 109)
         angle (r/atom 0)
         focus? (r/atom false)]
     (fn [id src height width valid-offset?]
-      [:img.absolute.pointer.select-none.outline-none.transition
+      [:img.absolute
        {:id id
         :tabIndex 0
         :on-focus #(reset! focus? true)
         :on-blur #(reset! focus? false)
         :on-key-down (fn [e]
+                       (println "yo!!")
                        (when (= (.-key e) "r")
                          (swap! angle (partial + 90))))
         :on-drag-start (on-drag-start-fn id angle valid-offset? z-index offset-x offset-y)
@@ -71,8 +74,12 @@
                 :left (str @x "px")
                 :z-index @z-index
                 :opacity (if @focus? 0.8 1)
-                :transform (str "rotate(" @angle "deg)")}
-        :src src}])))
+                :transform (str "rotate(" @angle "deg)")
+                :transition "transform 0.2s ease-in-out"
+                :cursor :pointer
+                :user-select "none"
+                :outline "none"}
+        :src (str "/assets/images/puzzle/" src)}])))
 
 (def nop (constantly true))
 
@@ -143,15 +150,17 @@
       (quad4? "gray" ol ot))))
 
 (defn body []
-  [:div.fixed.top-0.left-0.bottom-0.right-0.flex.justify-center.items-center.flex-column
+  [:div.relative.flex.justify-center.items-center.flex-column {:on-click #(println "Yoooooo")
+                                                               :style {:z-index 100}}
    [:div#box.border.flex.justify-center.items-center.flex-column
     {:style {:border-width "10px"
              :border-radius "10px"
              :height "350px"
              :width "350px"
              :color "black"}}]
-   [:div.transition.pt3.center.select-none
-    {:style {:opacity (if @completed? 1 0)}}
+   [:div.transition.pt3.center
+    {:style {:opacity (if @completed? 1 0)
+             :user-select "none"}}
     [:h1 "No manches, paisano!"]
     [:h2 "You did it."]]
    [shape "gray" "gray.svg" 150 75 valid-gray?]
