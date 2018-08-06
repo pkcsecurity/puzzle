@@ -20,12 +20,10 @@
                  0
                  0))
 
-(defn id->coords [id e]
-  (let [click-x (.-pageX e)
-        click-y (.-pageY e)
-        {:keys [x y]} (xy id)]
-    {:x (- click-x x)
-     :y (- click-y y)}))
+(defn id->coords [_ e]
+  (.log js/console (.. e -nativeEvent -offsetX))
+    {:x (.. e -nativeEvent -offsetX)
+     :y (.. e -nativeEvent -offsetY)})
 
 (defn on-drag-start-fn [id angle valid-offset? z-index offset-x offset-y]
   (fn [e]
@@ -36,17 +34,26 @@
       (reset! offset-x x) 
       (reset! offset-y y)
       (when-not (valid-offset? x y @angle)
-        (swap! z-index dec)
+        (do
+          (swap! z-index dec)
+          (println "I'm not a valid offset"))
         (.preventDefault e)))))
 
 (defn on-drag-fn [id x y offset-x offset-y]
   (fn [e]
     (println "yo3")
     (let [x1 (.-clientX e)
-          y1 (.-clientY e)]
+          y1 (.-clientY e)
+          yy (.-screenY e)]
+      (println (str "x1: " x1))
+      (println (str "y1: " y1))
+      (println (str "x: " @x))
+      (println (str "y: " @y))
+      (println (.-clientHeight (.getElementById js/document "app")))
+      (println (str yy))
       (when-not (and (zero? x1) (zero? y1))
         (reset! x (- x1 @offset-x))
-        (reset! y (- y1 @offset-y))))))
+        (reset! y (- y1 350 @offset-y))))))
 
 (defn shape [id src height width valid-offset?]
   (let [x (r/atom (clamped-rand-int 0 (- (.-innerWidth js/window) width)))
@@ -68,6 +75,7 @@
                          (swap! angle (partial + 90))))
         :on-drag-start (on-drag-start-fn id angle valid-offset? z-index offset-x offset-y)
         :on-drag (on-drag-fn id x y offset-x offset-y)
+        :on-click #(println (str "x: " @x " y: " @y))
         :style {:height (str height "px")
                 :width (str width "px")
                 :top (str @y "px")
