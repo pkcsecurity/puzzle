@@ -19,7 +19,6 @@
                 :source-paths ["cljs-src"]
                 :compiler
                 {:output-to "static/release/index.js"
-                 :source-map "static/release/index.js.map"
                  :main puzzle.cljs.core
                  :output-dir "static/release/js"
                  :optimizations :advanced

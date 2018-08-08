@@ -27,50 +27,39 @@
 
 (defn on-drag-start-fn [id angle valid-offset? z-index offset-x offset-y]
   (fn [e]
-    (println "yo2")
     (remove-drag-shadow e)
     (reset! z-index 110)
     (let [{:keys [x y]} (id->coords id e)]
       (reset! offset-x x) 
       (reset! offset-y y)
       (when-not (valid-offset? x y @angle)
-        (do
-          (swap! z-index dec)
-          (println "I'm not a valid offset"))
+        (swap! z-index dec)
         (.preventDefault e)))))
 
 (defn on-drag-fn [id x y offset-x offset-y]
   (fn [e]
-    (println "yo3")
     (let [x1 (.-clientX e)
           y1 (.-clientY e)
-          yy (.-screenY e)]
-      (println (str "x1: " x1))
-      (println (str "y1: " y1))
-      (println (str "x: " @x))
-      (println (str "y: " @y))
-      (println (.-clientHeight (.getElementById js/document "app")))
-      (println (str yy))
+          bounding (.getBoundingClientRect (.getElementById js/document "app"))]
       (when-not (and (zero? x1) (zero? y1))
         (reset! x (- x1 @offset-x))
-        (reset! y (- y1 350 @offset-y))))))
+        (reset! y (- y1 (.-top bounding) @offset-y))))))
 
 (defn shape [id src height width valid-offset?]
-  (let [x (r/atom (clamped-rand-int 0 (- (.-innerWidth js/window) width)))
-        y (r/atom (clamped-rand-int 0 (- (.-innerHeight js/window) height)))
+  (let [x (r/atom (clamped-rand-int 0 (- (.-clientWidth (.getElementById js/document "app")) width)))
+        y (r/atom (clamped-rand-int 0 (+ (.-clientHeight (.getElementById js/document "app")) height)))
         offset-x (r/atom 0)
         offset-y  (r/atom 0)
         z-index (r/atom 109)
         angle (r/atom 0)
         focus? (r/atom false)]
     (fn [id src height width valid-offset?]
-      [:img.absolute
+      [:img
        {:id id
         :tabIndex 0
         :on-focus #(reset! focus? true)
         :on-blur #(reset! focus? false)
         :on-key-down (fn [e]
-                       (println "yo!!")
                        (when (= (.-key e) "r")
                          (swap! angle (partial + 90))))
         :on-drag-start (on-drag-start-fn id angle valid-offset? z-index offset-x offset-y)
@@ -86,7 +75,8 @@
                 :transition "transform 0.2s ease-in-out"
                 :cursor :pointer
                 :user-select "none"
-                :outline "none"}
+                :outline "none"
+                :position "absolute"}
         :src (str "/assets/images/puzzle/" src)}])))
 
 (def nop (constantly true))
@@ -158,18 +148,49 @@
       (quad4? "gray" ol ot))))
 
 (defn body []
-  [:div.relative.flex.justify-center.items-center.flex-column {:on-click #(println "Yoooooo")
-                                                               :style {:z-index 100}}
-   [:div#box.border.flex.justify-center.items-center.flex-column
-    {:style {:border-width "10px"
-             :border-radius "10px"
-             :height "350px"
-             :width "350px"
-             :color "black"}}]
-   [:div.transition.pt3.center
-    {:style {:opacity (if @completed? 1 0)
-             :user-select "none"}}
-    [:h1 "No manches, paisano!"]
+  [:div {:style {:z-index 100
+                 :position :relative
+                 :-webkit-box-pack :center
+                 :-webkit-justify-content :center
+                 :-mx-flex-pack :center
+                 :justify-content :center
+                 :-webkit-box-align :center
+                 :-webkit-align-items :center
+                 :-ms-flex-align :center
+                 :-ms-grid-row-align :center
+                 :align-items :center
+                 :-webkit-box-orient :vertical
+                 :-webkit-box-direction :normal
+                 :-webkit-flex-direction :column
+                 :-ms-flex-direction :column
+                 :flex-direction :column
+                 :display :flex}}
+   [:div#box {:style {:border-width "10px"
+                      :border-radius "10px"
+                      :height "350px"
+                      :width "350px"
+                      :border-color "white"
+                      :border-style "solid"
+                      :-webkit-box-pack :center
+                      :-webkit-justify-content :center
+                      :-ms-flex-pack :center
+                      :justify-content :center
+                      :-webkit-box-align :center
+                      :-webkit-align-items :center
+                      :-ms-flex-align :center
+                      :-ms-grid-row-align :center
+                      :align-items :center
+                      :-webkit-box-orient :vertical
+                      :-webkit-box-direction :normal
+                      :-webkit-flex-direction :column
+                      :-ms-flex-direction :column
+                      :flex-direction :column
+                      :display :flex}}]
+   [:div {:style {:opacity (if @completed? 1 0)
+                  :user-select "none"
+                  :padding-top "2rem"
+                  :text-align "center"}}
+    [:h1 "No manches, paisano!!"]
     [:h2 "You did it."]]
    [shape "gray" "gray.svg" 150 75 valid-gray?]
    [shape "green" "green.svg" 150 150 valid-green?]
