@@ -191,7 +191,9 @@
                   :padding-top "2rem"
                   :text-align "center"}}
     [:h1 "No manches, paisano!!"]
-    [:h2 "You did it."]]
+    [:h2 "You did it! You seem cool...you should "
+     [:a {:href "https://game.pkc.io" :target "_blank" :rel "noopener noreferrer"} "apply"]
+     "!"]]
    [shape "gray" "gray.svg" 150 75 valid-gray?]
    [shape "green" "green.svg" 150 150 valid-green?]
    [shape "navy" "navy.svg" 150 300 valid-navy?]
